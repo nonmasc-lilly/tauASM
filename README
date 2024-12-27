@@ -4,38 +4,35 @@ A simple assembler written in C90.
 
 ---= Directives =---
 
---= Next Update =--
+  org <address>
+    sets $ and $$ to <address>
+  db arg, arg2, ...
+    puts the values of the bytes arg1, arg2, etc. in order in the final program
+  times <expr> <instr>
+    gets replaced with <expr> instances of <instr>
+    <expr> may be of the following form:
+      <expr> <expr> +
+      <expr> <expr> -
+      $
+      $$
+      <number>
+        
 
- org <address>
-   sets the current address to <address>
- db <argument list>
-where
- <argument list> ::= <argument> | <argument> , <argument list>
- <argument>      ::= <byte> | <string>
-   Stores the bytes given in order at the current position in the output assembly, when
-   a string literal is encountered, each character is to be considered as its ASCII
-   counterpart, whose value is then stored in the order in which they appear in the
-   string literal.
- times <t-expr> <instr>
-where
- <instr> is any instruction or directive
- <texpr> ::= <add> | <sub> | <mul> | <div> | <number> | "$" | "$$"
- <add>   ::= "+" <FSP> <texpr> <FSP> <texpr>
- <sub>   ::= "-" <FSP> <texpr> <FSP> <texpr>
- <mul>   ::= "*" <FSP> <texpr> <FSP> <texpr>
- <div>   ::= "/" <FSP> <texpr> <FSP> <texpr>
-   Replaced with the instruction passed copied the number of times corresponding to the
-   given expression.
+--= Next Update =--
 
 --= Future =--
 
 
 ---= Roadmap =---
 
-VERSION 0.0 -- HEXMOD --
+## VERSION 0.0 -- HEXMOD -- ##
   HEXMOD simply includes the following directives:
     - org
     - db
     - times
   One could in theory define any program which you might want by simply hand writing the
   bytes, of course, this is... tedious, and is done here, mainly for testing purposes.
+
+VERSION 0.1
+  Full code cleanup holy shit im writing this with four hours sleep at 4AM what is wrong
+  with me ~.~

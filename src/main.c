@@ -3,8 +3,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "lex.h"
+#include "assemble.h"
 #include "utils/debug.h"
 
+/* TODO: CLEANUP CODEBASE FROM SHITTY CODING WRITTEN ON FUMES */
 int main(int argc, char **argv) {
         uint32_t i;
         const char *input_file = NULL, *output_file = "./a.out";
@@ -18,7 +20,7 @@ argument_parsing: {
                                 i < argc-1,
                                 ERROR_LEVEL_ERROR,
                                 "Opt-Error: ",
-                                "-o expected argument "
+                                "-o expects argument "
                                 "(--help for more info).\n"
                           );
                           output_file = argv[++i];
@@ -32,7 +34,7 @@ argument_parsing: {
                                 !input_file,
                                 ERROR_LEVEL_ERROR,
                                 "Opt-Error: ",
-                                "multiple input files, first is: "
+                                "Multiple input files, first is: "
                                 "%s, second is: %s.",
                                 input_file, argv[i]
                         );
@@ -52,7 +54,7 @@ argument_parsing: {
                 input_file,
                 ERROR_LEVEL_ERROR,
                 "Opt-Error: ",
-                "expected input file.\n"
+                "Expected input file.\n"
         );
 }
 file_reading: {
@@ -62,7 +64,8 @@ file_reading: {
         dassert(
                 !!fp,
                 ERROR_LEVEL_ERROR,
-                "FS-Error: Could not open file `%s` for reading",
+                "FS-Error: ",
+                "Could not open file `%s` for reading.",
                 input_file
         );
         fseek(fp, 0L, SEEK_END);
@@ -73,16 +76,32 @@ file_reading: {
         fclose(fp);
         if(debug) eprintf(ERROR_LEVEL_INFO, "Debug (file read):\n", "%s\n", file_contents);
 }
-assembly: {
+write_file: {
+        FILE *fp;
+        BYTE_BUFFER output;
+ assembly: {
         TOKENS lexed_tokens;
-lexical_analysis: {
+  lexical_analysis: {
         string_lex(&lexed_tokens, file_contents);
         if(debug) {
                 print_with_error_level(ERROR_LEVEL_INFO, "Debug (lexed):\n");
                 tokens_print(stderr, &lexed_tokens);
         }
-}
+  }
+        tokens_assemble(&output, &lexed_tokens);
         tokens_destroy(&lexed_tokens);
+ }
+        fp = fopen(output_file, "w");
+        dassert(
+                !!fp,
+                ERROR_LEVEL_ERROR,
+                "FS-Error: ",
+                "Could not open file `%s` for reading.",
+                output_file
+        );
+        fwrite(output.buffer, 1, output.length, fp);
+        fclose(fp);
+        free(output.buffer);
 }
         return 0;
 }

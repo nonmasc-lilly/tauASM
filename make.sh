@@ -2,6 +2,7 @@ default_test="minima"
 HELP=false
 TEST="None"
 CFLAGS="-std=c90 -Wpedantic -Wmissing-field-initializers"
+DFLAGS="-g"
 
 for i in $@; do
         [ "$i" =                "-h" ] && HELP=true
@@ -26,6 +27,8 @@ done
         echo " -h / --help :: open this menu and exit";
         exit 0;
 }
+
+[ -d build ] || mkdir build
 
 gcc -o build/tausm src/*.c src/utils/*.c $CFLAGS && (
         [ "$TEST" =     "minima" ] && build/tausm

@@ -13,17 +13,19 @@ bool token_type_has_value(TOKEN_TYPE type) {
                 false, false, false,
                 false, false, false,
                 false, false, false,
-                false, false
+                false, false, false,
+                false
         };
         return has_value[type];
 }
 const char *token_type_repr_string(TOKEN_TYPE type) {
         static const char *repr_strings[TOKEN_TYPE__MAX] = {
-                "NULL",         "<number>",     "<identifier>",
-                "org",          "db",           "dw",
-                "dd",           "dq",           "times",
-                "comma `,`",    "plus `+`",     "minus `-`",
-                "position `$`", "origin `$$`"
+                "NULL",                         "<number>",     "<identifier>",
+                "org",                          "db",           "dw",
+                "dd",                           "dq",           "times",
+                "comma `,`",                    "plus `+`",     "minus `-`",
+                "position `$`",                 "origin `$$`",  "open parenthesis `(`",
+                "close parenthesis `)`"
         };
         return repr_strings[type];
 }
@@ -73,9 +75,11 @@ void tokens_print(FILE *out, const TOKENS *ret) {
 
 TOKEN_TYPE token_type_from_char(const char *string, uint32_t *offset) {
         switch(string[*offset]) {
-        case ',': return TOKEN_TYPE_COMMA;
-        case '+': return  TOKEN_TYPE_PLUS;
-        case '-': return TOKEN_TYPE_MINUS;
+        case ',': return       TOKEN_TYPE_COMMA;
+        case '+': return        TOKEN_TYPE_PLUS;
+        case '-': return       TOKEN_TYPE_MINUS;
+        case '(': return  TOKEN_TYPE_OPEN_PAREN;
+        case ')': return TOKEN_TYPE_CLOSE_PAREN;
         case '$': if(string[*offset+1] == '$') return (++*offset, TOKEN_TYPE_ORIGPOS);
                   else return TOKEN_TYPE_CURPOS;
         default:  return TOKEN_TYPE_NULL;
@@ -116,7 +120,8 @@ void string_lex(TOKENS *ret, const char *string) {
         TOKEN_TYPE types[2];
         tokens_create(ret);
         buffer = calloc(1,1);
-        for(line = i = 0; string[i]; i++) {
+        line = 0;
+        for(i = 0; string[i]; i++) {
                 if(string[i] == '\n') ++line;
                 if(!(isspace(string[i]) || (types[0] = token_type_from_char(string, &i)) ||
                                 string[i] == ';')) {
@@ -129,6 +134,7 @@ void string_lex(TOKENS *ret, const char *string) {
                         tokens_append(ret, types[1], line, buffer);
                 *(buffer = realloc(buffer, 1)) = 0;
                 if(string[i] == ';') {
+                        ++line;
                         for(; string[i] && string[i] != '\n'; i++);
                         if(!string[i]) break;
                         continue;

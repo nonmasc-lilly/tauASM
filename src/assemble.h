@@ -5,6 +5,12 @@
 #include "lex.h"
 
 typedef struct {
+        uint8_t *buffer;
+        uint32_t length;
+} BYTE_BUFFER;
+
+typedef struct {
+        BYTE_BUFFER    *ret;
         const TOKENS   *input_tokens;
         uint32_t        token_index;
         uint32_t        curpos;
@@ -12,11 +18,14 @@ typedef struct {
 } ASM_STATE;
 
 #define INTERNAL_NUMBER_OF_STATEMENT_FUNCTIONS 3
+typedef bool (*INTERN_ASM_FUNC)(ASM_STATE *state);
 bool internal_assemble_statement(ASM_STATE *state);
 bool internal_assemble_org(ASM_STATE *state);
 bool internal_assemble_db(ASM_STATE *state);
 bool internal_assemble_times(ASM_STATE *state);
 
-void tokens_assemble(const TOKENS *input_tokens);
+void buffer_pushb(BYTE_BUFFER *ret, uint8_t byte);
+
+void tokens_assemble(BYTE_BUFFER *ret, const TOKENS *input_tokens);
 
 #endif

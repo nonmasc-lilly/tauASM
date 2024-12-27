@@ -32,5 +32,12 @@ void dassert(
         const char *format,
         ...
 );
+void vdassert(
+        bool condition,
+        ERROR_LEVEL error_level,
+        const char *prefix,
+        const char *format,
+        va_list args
+);
 
 #endif

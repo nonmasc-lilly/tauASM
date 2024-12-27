@@ -55,3 +55,14 @@ void dassert(
         }
         va_end(args);
 }
+void vdassert(
+                bool condition,
+                ERROR_LEVEL error_level,
+                const char *prefix,
+                const char *format,
+                va_list args) {
+        if(!condition) {
+                evprintf(error_level, prefix, format, args);
+                exit(1);
+        }
+}
