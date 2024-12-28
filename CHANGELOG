@@ -1,0 +1,12 @@
+
+
+---### tauASM Changelog ###---
+
+V0.0.1
+        eat the spaghetti in main.c
+V0.0 HEXMOD
+        added org   directive
+        added db    directive
+        added times directive
+
+
