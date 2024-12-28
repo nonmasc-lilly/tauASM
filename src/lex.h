@@ -21,6 +21,7 @@ typedef uint8_t TOKEN_TYPE; enum {
         TOKEN_TYPE_ORIGPOS      = 0x0D,
         TOKEN_TYPE_OPEN_PAREN   = 0x0E,
         TOKEN_TYPE_CLOSE_PAREN  = 0x0F,
+        TOKEN_TYPE_COLON        = 0x10,
 
         TOKEN_TYPE__MAX
 };

@@ -29,8 +29,7 @@ void eprintf(
                 ...) {
         va_list args;
         va_start(args, format);
-        print_with_error_level(error_level, prefix);
-        vfprintf(stderr, format, args);
+        evprintf(error_level, prefix, format, args);
         va_end(args);
 }
 void evprintf(
@@ -49,10 +48,7 @@ void dassert(
                 ...) {
         va_list args;
         va_start(args, format);
-        if(!condition) {
-                evprintf(error_level, prefix, format, args);
-                exit(1);
-        }
+        vdassert(condition, error_level, prefix, format, args);
         va_end(args);
 }
 void vdassert(
@@ -65,4 +61,30 @@ void vdassert(
                 evprintf(error_level, prefix, format, args);
                 exit(1);
         }
+}
+
+bool nb_dassert(
+                bool condition,
+                ERROR_LEVEL error_level,
+                const char *prefix,
+                const char *format,
+                ...) {
+        bool ret;
+        va_list args;
+        va_start(args, format);
+        ret = nb_vdassert(condition, error_level, prefix, format, args);
+        va_end(args);
+        return ret;
+}
+bool nb_vdassert(
+                bool condition,
+                ERROR_LEVEL error_level,
+                const char *prefix,
+                const char *format,
+                va_list args) {
+        if(!condition) {
+                evprintf(error_level, prefix, format, args);
+                return false;
+        }
+        return true;
 }

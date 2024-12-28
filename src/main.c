@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
                 print_with_error_level(ERROR_LEVEL_INFO, "Debug(lexed):\n");
                 tokens_print(stderr, &lexed_tokens);
         }
-        tokens_assemble(&output, &lexed_tokens);
+        tokens_assemble(&output, &lexed_tokens, cmd_options.debug);
         dassert(
                 !write_buffer_to_file(cmd_options.output_file, output),
                 ERROR_LEVEL_ERROR, "FS-Errror: ",

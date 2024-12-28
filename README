@@ -1,37 +1,39 @@
 --== TAUSM ==--
 
-A simple assembler written in C90. 
+A simple assembler written in C90. This document uses ABNF to specify syntax.
 
+---= Primitives =---
+  curpos = "$"
+    Equal to the position in the output binary which the assembler will place the
+    next byte.
+  origin = "$$"
+    Equal to the position which the last `org` directive specified, if no org directives
+    have been called, it defaults to 0.
+  number = ["-"] (*DIGIT / 0x *HEXDIG)
+    Any positive number, if a negative sign is included, the number is to be interpretted
+    as the twos complement of whatever expected size of the number specified is, so that
+    `db -4` is to be interpretted as: `db 0xFD`.
+  identifier = ALPHA *(ALPHA | DIGIT | "_")
+    An identifier for some sort of object
+  label = identifier ":"
+    Declares the specified identifier to be equivalent to the use of `$` *at the position
+    at which the label is defined*, so that `org 0x7C label: db 0, 0, label` will output:
+    [0, 0, 7C].
+  instr
+    may be any instruction or directive
 ---= Directives =---
 
-  org <address>
-    sets $ and $$ to <address>
-  db arg, arg2, ...
-    puts the values of the bytes arg1, arg2, etc. in order in the final program
-  times <expr> <instr>
-    gets replaced with <expr> instances of <instr>
-    <expr> may be of the following form:
-      <expr> <expr> +
-      <expr> <expr> -
-      $
-      $$
-      <number>
-
---= Next Update =--
-
---= Future =--
-
-
----= Roadmap =---
-
-## VERSION 0.0 -- HEXMOD -- ##
-  HEXMOD simply includes the following directives:
-    - org
-    - db
-    - times
-  One could in theory define any program which you might want by simply hand writing the
-  bytes, of course, this is... tedious, and is done here, mainly for testing purposes.
-
-VERSION 0.1
-  Full code cleanup holy shit im writing this with four hours sleep at 4AM what is wrong
-  with me ~.~
+  org = "org" number
+    sets $ and $$ to the address specified.
+  db = "db" arg *("," arg)
+    puts the values of the bytes arg1, arg2, etc. in order in the final program.
+  times_expr = (times_expr times_expr ("+" / "-")) / number / curpos / origin
+  times = "times" times_expr instr
+    equivalent to the specified instruction/directive repeated the number of times
+    which the specified expression evaluates to. This expression is in a modified
+    reverse polish notation, so that `5 - 3` would become: `3 5 -` (the modification
+    being that the order of inputted items is reversed, so that instead of `5 3 -`
+    we have `3 5 -` this allows us to simply read right to left and the meaning of
+    expressions is largely understandable). In order to make these expressions easier
+    to read a matched set of parenthesis may enclose any number of terms. So that:
+    `$$ $ - 510 -` may be: `($$ $) - 510 -`, `($$ $ -) 510 -`, `(($$ $ -) 510 -)`, etc.

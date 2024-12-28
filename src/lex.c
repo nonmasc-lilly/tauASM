@@ -14,7 +14,7 @@ bool token_type_has_value(TOKEN_TYPE type) {
                 false, false, false,
                 false, false, false,
                 false, false, false,
-                false
+                false, false
         };
         return has_value[type];
 }
@@ -25,7 +25,7 @@ const char *token_type_repr_string(TOKEN_TYPE type) {
                 "dd",                           "dq",           "times",
                 "comma `,`",                    "plus `+`",     "minus `-`",
                 "position `$`",                 "origin `$$`",  "open parenthesis `(`",
-                "close parenthesis `)`"
+                "close parenthesis `)`",        "colon `:`"
         };
         return repr_strings[type];
 }
@@ -80,6 +80,7 @@ TOKEN_TYPE token_type_from_char(const char *string, uint32_t *offset) {
         case '-': return       TOKEN_TYPE_MINUS;
         case '(': return  TOKEN_TYPE_OPEN_PAREN;
         case ')': return TOKEN_TYPE_CLOSE_PAREN;
+        case ':': return       TOKEN_TYPE_COLON;
         case '$': if(string[*offset+1] == '$') return (++*offset, TOKEN_TYPE_ORIGPOS);
                   else return TOKEN_TYPE_CURPOS;
         default:  return TOKEN_TYPE_NULL;
@@ -89,29 +90,38 @@ TOKEN_TYPE token_type_from_char(const char *string, uint32_t *offset) {
 TOKEN_TYPE token_type_from_string(const char *string, uint32_t line) {
         uint32_t i;
         char *lower_copy, *eptr;
+        TOKEN_TYPE ret;
         if(!*string) return TOKEN_TYPE_NULL;
         lower_copy = malloc(strlen(string)+1);
         strcpy(lower_copy, string);
         for(i = 0; lower_copy[i]; i++) {
                 lower_copy[i] = tolower(lower_copy[i]);
         }
-        if(!strcmp(lower_copy,   "org"))        return TOKEN_TYPE_ORG;
-        if(!strcmp(lower_copy,    "db"))        return TOKEN_TYPE_DB;
-        if(!strcmp(lower_copy,    "dw"))        return TOKEN_TYPE_DW;
-        if(!strcmp(lower_copy,    "dd"))        return TOKEN_TYPE_DD;
-        if(!strcmp(lower_copy,    "dq"))        return TOKEN_TYPE_DQ;
-        if(!strcmp(lower_copy, "times"))        return TOKEN_TYPE_TIMES;
-        if(!memcmp(lower_copy, "0x", 0x02))     strtol(lower_copy, &eptr, 0x10);
-        else                                    strtol(lower_copy, &eptr, 0x0A);
-        if(!*eptr) return TOKEN_TYPE_NUMBER;
-        if(isalpha(*string)) for(i = 1; string[i]; i++)
-                dassert(
-                        isalnum(string[i]) || string[i] == '_',
-                        ERROR_LEVEL_ERROR,
-                        "Invalid token `%s` on line: %d\n",
-                        string, line
-                );
-        return TOKEN_TYPE_IDENTIFIER;
+        if(!strcmp(lower_copy,   "org"))        ret = TOKEN_TYPE_ORG;
+        else if(!strcmp(lower_copy,    "db"))        ret = TOKEN_TYPE_DB;
+        else if(!strcmp(lower_copy,    "dw"))        ret = TOKEN_TYPE_DW;
+        else if(!strcmp(lower_copy,    "dd"))        ret = TOKEN_TYPE_DD;
+        else if(!strcmp(lower_copy,    "dq"))        ret = TOKEN_TYPE_DQ;
+        else if(!strcmp(lower_copy, "times"))        ret = TOKEN_TYPE_TIMES;
+        else {
+                if(!memcmp(lower_copy, "0x", 0x02)) strtol(lower_copy, &eptr, 0x10);
+                else strtol(lower_copy, &eptr, 0x0A);
+                if(!*eptr) {
+                        free(lower_copy);
+                        return TOKEN_TYPE_NUMBER;
+                }
+                free(lower_copy);
+                if(isalpha(*string)) for(i = 1; string[i]; i++)
+                        dassert(
+                                isalnum(string[i]) || string[i] == '_',
+                                ERROR_LEVEL_ERROR,
+                                "Invalid token `%s` on line: %d\n",
+                                string, line
+                        );
+                return TOKEN_TYPE_IDENTIFIER;
+        }
+        free(lower_copy);
+        return ret;
 }
 
 void string_lex(TOKENS *ret, const char *string) {

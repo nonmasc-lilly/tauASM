@@ -39,5 +39,19 @@ void vdassert(
         const char *format,
         va_list args
 );
+bool nb_dassert(
+        bool condition,
+        ERROR_LEVEL error_level,
+        const char *prefix,
+        const char *format,
+        ...
+);
+bool nb_vdassert(
+        bool condition,
+        ERROR_LEVEL error_level,
+        const char *prefix,
+        const char *format,
+        va_list args
+);
 
 #endif
